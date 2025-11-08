@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Mesin Cuci Otomatis Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #27354e 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #60a5fa, #93c5fd, #dbeafe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel h3 {
+            color: #93c5fd;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #bfdbfe;
+            font-weight: 600;
+        }
+
+        select, input[type="range"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1e3c72;
+            color: #fff;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 8px;
+        }
+
+        .range-value {
+            text-align: center;
+            color: #60a5fa;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        #start-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        #start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        #stop-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        #stop-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        #reset-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        #reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        #add-clothes-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        #add-clothes-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .washing-machine {
+            position: relative;
+            background: linear-gradient(145deg, #1e40af, #1e3a8a);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 3px solid #3b82f6;
+        }
+
+        .machine-display {
+            background: #0f172a;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #1e40af;
+        }
+
+        .display-text {
+            font-size: 1.5em;
+            color: #60a5fa;
+            font-weight: bold;
+            text-shadow: 0 0 10px #3b82f6;
+        }
+
+        .machine-body {
+            position: relative;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+
+        .machine-door {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #2563eb, #1d4ed8);
+            border-radius: 50%;
+            padding: 20px;
+            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 8px solid #1e40af;
+        }
+
+        .door-window {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            border: 6px solid #3b82f6;
+            box-shadow: inset 0 0 50px rgba(59, 130, 246, 0.5);
+        }
+
+        .drum {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .clothes-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+
+        .cloth {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: absolute;
+            transition: all 0.5s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .water-container {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0.7), rgba(2, 132, 199, 0.7), rgba(3, 105, 161, 0.7));
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .water-container.filling {
+            animation: waterRipple 2s infinite;
+        }
+
+        @keyframes waterRipple {
+            0%, 100% { box-shadow: inset 0 0 30px rgba(6, 182, 212, 0.8); }
+            50% { box-shadow: inset 0 0 50px rgba(6, 182, 212, 1); }
+        }
+
+        .drum.spinning .cloth {
+            animation: spinCloth 2s linear infinite;
+        }
+
+        @keyframes spinCloth {
+            0% { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+        }
+
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: rise 3s infinite;
+        }
+
+        @keyframes rise {
+            to {
+                bottom: 100%;
+                opacity: 0;
+            }
+        }
+
+        .water-inlet {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            z-index: 5;
+        }
+
+        .water-drop {
+            width: 8px;
+            height: 15px;
+            background: #3b82f6;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: absolute;
+            opacity: 0;
+        }
+
+        .water-drop.active {
+            animation: drop 0.5s infinite;
+        }
+
+        @keyframes drop {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+            100% {
+                top: 200px;
+                opacity: 0;
+            }
+        }
+
+        .sensor-indicators {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .sensor {
+            padding: 10px 20px;
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            border: 2px solid #1e40af;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .sensor.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            transform: scale(1.1);
+        }
+
+        .progress-section {
+            margin-top: 20px;
+        }
+
+        .progress-label {
+            color: #bfdbfe;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            background: rgba(0, 0, 0, 0.3);
+            height: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #1e40af;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .info-label {
+            color: #bfdbfe;
+        }
+
+        .info-value {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+
+        .cycle-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .cycle-btn {
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .cycle-btn:hover {
+            background: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .cycle-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #60a5fa;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        }
+
+        .timer-display {
+            text-align: center;
+            font-size: 2.5em;
+            color: #60a5fa;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 0 20px #3b82f6;
+        }
+
+        .clothes-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .cloth-option {
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cloth-option:hover {
+            background: rgba(59, 130, 246, 0.5);
+            transform: scale(1.05);
+        }
+
+        .cloth-color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 5px auto;
+            border: 2px solid #fff;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Simulasi Mesin Cuci Otomatis Pro</h1>
+        
+        <div class="main-grid">
+            <!-- Panel Kontrol Kiri -->
+            <div class="panel">
+                <h3>⚙️ Pengaturan</h3>
+                
+                <div class="control-group">
+                    <label for="water-level">Level Air:</label>
+                    <select id="water-level">
+                        <option value="30">Rendah (30%)</option>
+                        <option value="60" selected>Sedang (60%)</option>
+                        <option value="90">Tinggi (90%)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="water-temp">Suhu Air:</label>
+                    <select id="water-temp">
+                        <option value="cold">❄️ Dingin (20°C)</option>
+                        <option value="warm" selected>🌡️ Hangat (40°C)</option>
+                        <option value="hot">🔥 Panas (60°C)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="spin-speed">Kecepatan Putar:</label>
+                    <select id="spin-speed">
+                        <option value="400">Lambat (400 RPM)</option>
+                        <option value="800" selected>Sedang (800 RPM)</option>
+                        <option value="1200">Cepat (1200 RPM)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Intensitas Pencucian:</label>
+                    <input type="range" id="wash-intensity" min="1" max="5" value="3">
+                    <div class="range-value" id="intensity-value">Level 3</div>
+                </div>
+                
+                <h3 style="margin-top: 25px;">🔄 Siklus Cuci</h3>
+                <div class="cycle-options">
+                    <button class="cycle-btn active" data-cycle="normal">Normal</button>
+                    <button class="cycle-btn" data-cycle="quick">Cepat</button>
+                    <button class="cycle-btn" data-cycle="delicate">Halus</button>
+                    <button class="cycle-btn" data-cycle="heavy">Berat</button>
+                </div>
+
+                <h3 style="margin-top: 25px;">👕 Tambah Baju</h3>
+                <div class="control-group">
+                    <label for="cloth-count">Jumlah Baju:</label>
+                    <input type="number" id="cloth-count" min="1" max="15" value="5">
+                </div>
+                <div class="clothes-selector">
+                    <div class="cloth-option" data-color="#ef4444">
+                        <div class="cloth-color-preview" style="background: #ef4444;"></div>
+                        Merah
+                    </div>
+                    <div class="cloth-option" data-color="#3b82f6">
+                        <div class="cloth-color-preview" style="background: #3b82f6;"></div>
+                        Biru
+                    </div>
+                    <div class="cloth-option" data-color="#10b981">
+                        <div class="cloth-color-preview" style="background: #10b981;"></div>
+                        Hijau
+                    </div>
+                    <div class="cloth-option" data-color="#f59e0b">
+                        <div class="cloth-color-preview" style="background: #f59e0b;"></div>
+                        Kuning
+                    </div>
+                    <div class="cloth-option" data-color="#8b5cf6">
+                        <div class="cloth-color-preview" style="background: #8b5cf6;"></div>
+                        Ungu
+                    </div>
+                    <div class="cloth-option" data-color="#ec4899">
+                        <div class="cloth-color-preview" style="background: #ec4899;"></div>
+                        Pink
+                    </div>
+                </div>
+                <button id="add-clothes-btn">➕ Tambah Baju</button>
+            </div>
+            
+            <!-- Mesin Cuci Tengah -->
+            <div class="panel">
+                <div class="machine-display">
+                    <div class="display-text" id="status-text">SIAP BEROPERASI</div>
+                </div>
+
+                <div class="washing-machine">
+                    <div class="machine-body">
+                        <div class="water-inlet">
+                            <div class="water-drop" id="water-drop"></div>
+                        </div>
+                        
+                        <div class="machine-door">
+                            <div class="door-window">
+                                <div class="drum" id="drum">
+                                    <div class="clothes-container" id="clothes-container"></div>
+                                    <div class="water-container" id="water-container">
+                                        <div class="bubbles" id="bubbles"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sensor-indicators">
+                        <div class="sensor" id="sensor-low">MIN</div>
+                        <div class="sensor" id="sensor-medium">MED</div>
+                        <div class="sensor" id="sensor-high">MAX</div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>Progress Air:</span>
+                            <span id="water-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="timer-display" id="timer">00:00</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+                    <button id="start-btn">▶️ Mulai</button>
+                    <button id="stop-btn" disabled>⏸️ Jeda</button>
+                    <button id="reset-btn">🔄 Reset</button>
+                </div>
+            </div>
+            
+            <!-- Panel Info Kanan -->
+            <div class="panel">
+                <h3>📊 Informasi Sistem</h3>
+                
+                <div class="info-item">
+                    <span class="info-label">Jumlah Baju:</span>
+                    <span class="info-value" id="clothes-count">0 pcs</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Level Air:</span>
+                    <span class="info-value" id="current-level">0%</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Suhu:</span>
+                    <span class="info-value" id="current-temp">-</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Kecepatan:</span>
+                    <span class="info-value" id="current-speed">-</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Siklus:</span>
+                    <span class="info-value" id="current-cycle">Normal</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Intensitas:</span>
+                    <span class="info-value" id="current-intensity">Level 3</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Waktu Pengisian:</span>
+                    <span class="info-value" id="fill-time">0s</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Konsumsi Air:</span>
+                    <span class="info-value" id="water-usage">0L</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Estimasi Selesai:</span>
+                    <span class="info-value" id="estimate-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let isPaused = false;
+        let currentWaterLevel = 0;
+        let targetWaterLevel = 60;
+        let fillInterval;
+        let timerInterval;
+        let seconds = 0;
+        let selectedCycle = 'normal';
+        let clothesArray = [];
+        
+        const waterContainer = document.getElementById('water-container');
+        const clothesContainer = document.getElementById('clothes-container');
+        const progressBar = document.getElementById('progress-bar');
+        const waterPercentage = document.getElementById('water-percentage');
+        const statusText = document.getElementById('status-text');
+        const currentLevel = document.getElementById('current-level');
+        const currentTemp = document.getElementById('current-temp');
+        const currentSpeed = document.getElementById('current-speed');
+        const currentCycle = document.getElementById('current-cycle');
+        const currentIntensity = document.getElementById('current-intensity');
+        const fillTime = document.getElementById('fill-time');
+        const waterUsage = document.getElementById('water-usage');
+        const estimateTime = document.getElementById('estimate-time');
+        const timerDisplay = document.getElementById('timer');
+        const waterDrop = document.getElementById('water-drop');
+        const drum = document.getElementById('drum');
+        const bubbles = document.getElementById('bubbles');
+        const clothesCount = document.getElementById('clothes-count');
+        
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const addClothesBtn = document.getElementById('add-clothes-btn');
+        const waterLevelSelect = document.getElementById('water-level');
+        const waterTempSelect = document.getElementById('water-temp');
+        const spinSpeedSelect = document.getElementById('spin-speed');
+        const washIntensity = document.getElementById('wash-intensity');
+        const intensityValue = document.getElementById('intensity-value');
+        const clothCountInput = document.getElementById('cloth-count');
+
+        // Add clothes functionality
+        document.querySelectorAll('.cloth-option').forEach(option => {
+            option.addEventListener('click', function() {
+                if (!isRunning) {
+                    const color = this.dataset.color;
+                    const count = parseInt(clothCountInput.value);
+                    addClothes(color, count);
+                }
+            });
+        });
+
+        addClothesBtn.addEventListener('click', function() {
+            if (!isRunning) {
+                const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const count = parseInt(clothCountInput.value);
+                addClothes(randomColor, count);
+            }
+        });
+
+        function addClothes(color, count) {
+            for (let i = 0; i < count; i++) {
+                const cloth = document.createElement('div');
+                cloth.className = 'cloth';
+                cloth.style.background = color;
+                
+                const angle = Math.random() * 2 * Math.PI;
+                const radius = Math.random() * 80 + 20;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                cloth.style.left = `calc(50% + ${x}px)`;
+                cloth.style.top = `calc(50% + ${y}px)`;
+                cloth.style.transform = 'translate(-50%, -50%)';
+                
+                clothesContainer.appendChild(cloth);
+                clothesArray.push(cloth);
+            }
+            
+            updateClothesCount();
+        }
+
+        function updateClothesCount() {
+            clothesCount.textContent = clothesArray.length + ' pcs';
+        }
+
+        // Cycle buttons
+        document.querySelectorAll('.cycle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!isRunning) {
+                    document.querySelectorAll('.cycle-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedCycle = this.dataset.cycle;
+                    currentCycle.textContent = this.textContent;
+                    updateEstimate();
+                }
+            });
+        });
+
+        // Intensity slider
+        washIntensity.addEventListener('input', function() {
+            intensityValue.textContent = 'Level ' + this.value;
+            currentIntensity.textContent = 'Level ' + this.value;
+            updateEstimate();
+        });
+
+        waterLevelSelect.addEventListener('change', function() {
+            targetWaterLevel = parseInt(this.value);
+            updateEstimate();
+        });
+
+        waterTempSelect.addEventListener('change', updateTempDisplay);
+        spinSpeedSelect.addEventListener('change', updateSpeedDisplay);
+
+        function updateTempDisplay() {
+            const temps = { cold: '20°C', warm: '40°C', hot: '60°C' };
+            currentTemp.textContent = temps[waterTempSelect.value];
+        }
+
+        function updateSpeedDisplay() {
+            currentSpeed.textContent = spinSpeedSelect.value + ' RPM';
+        }
+
+        function updateEstimate() {
+            if (!isRunning) {
+                const cycleTime = {
+                    normal: 45,
+                    quick: 25,
+                    delicate: 35,
+                    heavy: 60
+                };
+                const baseTime = cycleTime[selectedCycle] || 45;
+                const intensityMultiplier = parseInt(washIntensity.value) / 3;
+                const totalMinutes = Math.round(baseTime * intensityMultiplier);
+                estimateTime.textContent = totalMinutes + ' menit';
+            }
+        }
+
+        function createBubbles() {
+            if (!isRunning) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = Math.random() * 100 + '%';
+            bubble.style.width = bubble.style.height = (Math.random() * 15 + 5) + 'px';
+            bubble.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            bubble.style.animationDelay = Math.random() * 1 + 's';
+            bubbles.appendChild(bubble);
+            
+            setTimeout(() => bubble.remove(), 4000);
+        }
+
+        function startFilling() {
+            if (isRunning && !isPaused) return;
+            
+            if (clothesArray.length === 0) {
+                alert('Tambahkan baju terlebih dahulu!');
+                return;
+            }
+            
+            if (isPaused) {
+                isPaused = false;
+            } else {
+                isRunning = true;
+                seconds = 0;
+            }
+            
+            statusText.textContent = 'MENGISI AIR...';
+            waterDrop.classList.add('active');
+            waterContainer.classList.add('filling');
+            
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            waterLevelSelect.disabled = true;
+            waterTempSelect.disabled = true;
+            spinSpeedSelect.disabled = true;
+            washIntensity.disabled = true;
+            addClothesBtn.disabled = true;
+            
+            updateTempDisplay();
+            updateSpeedDisplay();
+            
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timerDisplay.textContent = 
+                    String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+                fillTime.textContent = seconds + 's';
+            }, 1000);
+            
+            const bubbleInterval = setInterval(() => {
+                if (!isRunning || isPaused) {
+                    clearInterval(bubbleInterval);
+                    return;
+                }
+                createBubbles();
+            }, 300);
+            
+            fillInterval = setInterval(() => {
+                if (currentWaterLevel < targetWaterLevel) {
+                    currentWaterLevel += 1;
+                    updateWaterLevel();
+                    
+                    const usage = (currentWaterLevel * 0.5).toFixed(1);
+                    waterUsage.textContent = usage + 'L';
+                    
+                    if (currentWaterLevel >= 30) {
+                        document.getElementById('sensor-low').classList.add('active');
+                    }
+                    if (currentWaterLevel >= 60) {
+                        document.getElementById('sensor-medium').classList.add('active');
+                    }
+                    if (currentWaterLevel >= 90) {
+                        document.getElementById('sensor-high').classList.add('active');
+                    }
+                } else {
+                    clearInterval(fillInterval);
+                    waterDrop.classList.remove('active');
+                    waterContainer.classList.remove('filling');
+                    startWashing();
+                }
+            }, 100);
+        }
+
+        function startWashing() {
+            statusText.textContent = 'MENCUCI...';
+            drum.classList.add('spinning');
+            
+            setTimeout(() => {
+                statusText.textContent = 'MEMBILAS...';
+                
+                setTimeout(() => {
+                    statusText.textContent = 'MENGERINGKAN...';
+                    
+                    setTimeout(() => {
+                        completeWash();
+                    }, 3000);
+                }, 4000);
+            }, 5000);
+        }
+
+        function completeWash() {
+            statusText.textContent = '✅ SELESAI!';
+            drum.classList.remove('spinning');
+            isRunning = false;
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            waterLevelSelect.disabled = false;
+            waterTempSelect.disabled = false;
+            spinSpeedSelect.disabled = false;
+            washIntensity.disabled = false;
+            addClothesBtn.disabled = false;
+            
+            clearInterval(timerInterval);
+        }
+
+        function updateWaterLevel() {
+            waterContainer.style.height = currentWaterLevel + '%';
+            progressBar.style.width = currentWaterLevel + '%';
+            waterPercentage.textContent = currentWaterLevel + '%';
+            currentLevel.textContent = currentWaterLevel + '%';
+        }
+
+        function pauseFilling() {
+            isPaused = true;
+            clearInterval(fillInterval);
+            clearInterval(timerInterval);
+            waterDrop.classList.remove('active');
+            waterContainer.classList.remove('filling');
+            drum.classList.remove('spinning');
+            statusText.textContent = '⏸️ DIJEDA';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        function resetMachine() {
+            isRunning = false;
+            isPaused = false;
+            currentWaterLevel = 0;
+            seconds = 0;
+            
+            clearInterval(fillInterval);
+            clearInterval(timerInterval);
+            
+            waterContainer.style.height = '0%';
+            progressBar.style.width = '0%';
+            waterPercentage.textContent = '0%';
+            currentLevel.textContent = '0%';
+            timerDisplay.textContent = '00:00';
+            fillTime.textContent = '0s';
+            waterUsage.textContent = '0L';
+            
+            waterDrop.classList.remove('active');
+            waterContainer.classList.remove('filling');
+            drum.classList.remove('spinning');
+            bubbles.innerHTML = '';
+            
+            // Remove all clothes
+            clothesArray.forEach(cloth => cloth.remove());
+            clothesArray = [];
+            updateClothesCount();
+            
+            document.querySelectorAll('.sensor').forEach(s => s.classList.remove('active'));
+            
+            statusText.textContent = 'SIAP BEROPERASI';
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            waterLevelSelect.disabled = false;
+            waterTempSelect.disabled = false;
+            spinSpeedSelect.disabled = false;
+            washIntensity.disabled = false;
+            addClothesBtn.disabled = false;
+            
+            updateTempDisplay();
+            updateSpeedDisplay();
+            updateEstimate();
+        }
+
+        startBtn.addEventListener('click', startFilling);
+        stopBtn.addEventListener('click', pauseFilling);
+        resetBtn.addEventListener('click', resetMachine);
+
+        // Initialize displays
+        updateTempDisplay();
+        updateSpeedDisplay();
+        updateEstimate();
+        updateClothesCount();
+    </script>
+</body>
+</html>
